@@ -1,6 +1,6 @@
 import { User } from "../models/user.js";
 import { wrapAsync } from "../utils/wrapAsync.js";
-
+import twilio from "twilio";
 const postUser = async (req, res) => {
   console.log("Received Data:", req.body); // Debugging log
 
@@ -35,5 +35,43 @@ const logOut = wrapAsync(async (req, res, next) => {
 });
 
 
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
-export { postUser, logOut };
+ const sendSOSCall = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Fetch user from DB
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.alternate_no) {
+      return res.status(404).json({ error: "Alternate number not found" });
+    }
+
+    // Initiate SOS call
+    const call = await client.calls.create({
+      url: "http://demo.twilio.com/docs/voice.xml",
+      to: user.alternate_no,
+      from: process.env.TWILIO_PHONE_NUMBER,
+    });
+
+    console.log("SOS Call SID:", call.sid);
+    res.json({ message: "SOS Call initiated", callSid: call.sid });
+  } catch (error) {
+    console.error("Twilio Error:", error);
+    res.status(500).json({ error: "Failed to make the call" });
+  }
+};
+
+
+export { postUser, logOut,sendSOSCall };
