@@ -39,8 +39,7 @@ const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
-
- const sendSOSCall = async (req, res) => {
+const sendSOSCall = async (req, res) => {
   try {
     const { userId } = req.body;
 
@@ -58,6 +57,8 @@ const client = twilio(
       return res.status(404).json({ error: "Alternate number not found" });
     }
 
+    console.log("Initiating SOS call to:", user.alternate_no);
+
     // Initiate SOS call
     const call = await client.calls.create({
       url: "http://demo.twilio.com/docs/voice.xml",
@@ -65,11 +66,12 @@ const client = twilio(
       from: process.env.TWILIO_PHONE_NUMBER,
     });
 
-    console.log("SOS Call SID:", call.sid);
+    console.log("SOS Call Successful. Call SID:", call.sid);
     res.json({ message: "SOS Call initiated", callSid: call.sid });
+
   } catch (error) {
-    console.error("Twilio Error:", error);
-    res.status(500).json({ error: "Failed to make the call" });
+    console.error("Twilio Error:", error); // Print full error
+    res.status(500).json({ error: error.message || "Failed to make the call" });
   }
 };
 
