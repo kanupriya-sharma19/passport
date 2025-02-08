@@ -51,13 +51,13 @@ const logOut = wrapAsync(async (req, res, next) => {
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
-);
-const sendSOSCall = async (req, res) => {
+);const sendSOSCall = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, from } = req.body;
 
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+    // Check if userId and from are provided
+    if (!userId || !from) {
+      return res.status(400).json({ error: "User ID and from phone number are required" });
     }
 
     // Fetch user from DB
@@ -76,7 +76,7 @@ const sendSOSCall = async (req, res) => {
     const call = await client.calls.create({
       url: "http://demo.twilio.com/docs/voice.xml",
       to: user.alternate_no,
-      from: process.env.TWILIO_PHONE_NUMBER,
+      from: from, // use the 'from' parameter from the request body
     });
 
     console.log("SOS Call Successful. Call SID:", call.sid);
