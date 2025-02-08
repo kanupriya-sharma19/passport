@@ -1,23 +1,32 @@
 import { User } from "../models/user.js";
 import { wrapAsync } from "../utils/wrapAsync.js";
 import twilio from "twilio";
+
 const postUser = async (req, res) => {
   console.log("Received Data:", req.body); // Debugging log
 
   try {
-    const { email, username, password, mobile_no ,alternate_no} = req.body;
+    const { email, username, password, mobile_no, alternate_no } = req.body;
     
-    if (!email || !username || !password || !mobile_no||!alternate_no) {
+    if (!email || !username || !password || !mobile_no || !alternate_no) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    const newUser = new User({ email, username, mobile_no ,alternate_no});
-    await User.register(newUser, password); // passport-local-mongoose handles hashing
-    res.json({ message: "User registered successfully" });
+    const newUser = new User({ email, username, mobile_no, alternate_no });
+    const registeredUser = await User.register(newUser, password); // passport-local-mongoose
+
+    console.log("Registered User:", registeredUser); // Debug log
+
+    res.json({
+      message: "User registered successfully",
+      userId: registeredUser._id,  // ✅ Send userId
+    });
   } catch (error) {
+    console.error("Signup Error:", error); // Log error for debugging
     res.status(400).json({ error: error.message });
   }
 };
+
 
 
 
