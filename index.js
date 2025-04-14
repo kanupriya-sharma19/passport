@@ -12,10 +12,24 @@ import cors from "cors";
 dotenv.config();
 const app = express();
 connectToDB();
+const allowedOrigins = [
+  "http://localhost:8081",           
+  "http://192.168.0.104:8081"       
+];
 
-app.use(cors({ origin: '*', credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
 
-const port =8081;
+
+const port =8080;
 app.use(express.json());
 app.use(session(sessionOptions));
 
