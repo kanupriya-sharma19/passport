@@ -80,6 +80,24 @@ const logOut = (req, res) => {
   res.json({ message: "Logout successful" });
 };
 
+const getUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId).select('-password'); // exclude password
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 const updateUserProfile = [
   
   async (req, res) => {
@@ -105,4 +123,4 @@ const updateUserProfile = [
   },
 ];
 
-export { postUser, loginUser, logOut, updateUserProfile };
+export { postUser, loginUser, logOut, updateUserProfile ,getUser};
