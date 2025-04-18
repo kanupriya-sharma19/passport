@@ -12,7 +12,10 @@ const validateUserInput = (email, password, confirmPassword) => {
   if (!email || !password || !confirmPassword) {
     return "All fields are required.";
   }
-
+  if (password.length < 6) {
+    return 'Password must be at least 6 characters long';
+  }
+  
   if (password !== confirmPassword) {
     return "Passwords do not match.";
   }
@@ -104,6 +107,10 @@ const updateUserProfile = [
     try {
       const userId = req.user.userId; 
       const { username, mobile_no, age, grade } = req.body;
+      if (!username || !mobile_no || !age ||!grade) {
+        return res.status(400).json({ error: "All Field are requried!!" });
+      }
+  
 
       const updateData = { username, mobile_no, age, grade };
 
