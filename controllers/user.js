@@ -41,7 +41,9 @@ const postUser = async (req, res) => {
       return res.status(400).json({ error: "Email already registered." });
     }
     const hashedPassword = await bcrypt.hash(password, 10);  
-    const newUser = new User({ email, username: email, password: hashedPassword });
+    const username = email.split('@')[0];
+const newUser = new User({ email, username, password: hashedPassword });
+
     await newUser.save();  
     res.json({ message: "User registered successfully", userId: newUser._id.toString() });
   } catch (error) {
